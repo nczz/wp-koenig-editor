@@ -65,17 +65,6 @@ $show_word_count = get_option( 'wp_koenig_show_word_count', true );
 </div>
 
 <script>
-    // Heartbeat: refresh post lock so other users see our lock.
-    (function() {
-        if (typeof jQuery !== 'undefined' && typeof wp !== 'undefined' && wp.heartbeat) {
-            var postId = <?php echo (int) $post_data['id']; ?>;
-            jQuery(document).on('heartbeat-send', function(e, data) {
-                data['wp-refresh-post-lock'] = { post_id: postId };
-            });
-        }
-    })();
-</script>
-<script>
     window.wpKoenigConfig = {
         postData: <?php echo wp_json_encode( $post_data ); ?>,
         restUrl: <?php echo wp_json_encode( esc_url_raw( rest_url() ) ); ?>,

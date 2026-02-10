@@ -10,7 +10,7 @@ export default function usePostData(initialData) {
         title: initialData.title || '',
         content: initialData.content || '',
         lexical_state: initialData.lexical_state || '',
-        status: initialData.status || 'draft',
+        status: (!initialData.status || initialData.status === 'auto-draft') ? 'draft' : initialData.status,
         slug: initialData.slug || '',
         excerpt: initialData.excerpt || '',
         date: initialData.date || '',
@@ -23,6 +23,7 @@ export default function usePostData(initialData) {
     const dirtyCounterRef = useRef(0);
     const savedCounterRef = useRef(0);
     const savingRef = useRef(false);
+    const pendingOverridesRef = useRef(null);
     const postDataRef = useRef(postData);
     postDataRef.current = postData;
     const initialDateRef = useRef(initialData.date || '');
@@ -36,8 +37,11 @@ export default function usePostData(initialData) {
     const isDirty = dirtyCounterRef.current !== savedCounterRef.current;
 
     const savePost = useCallback(async (overrides = {}) => {
-        // Deduplicate: skip if already saving.
-        if (savingRef.current) return;
+        // If already saving, queue overrides for a follow-up save.
+        if (savingRef.current) {
+            pendingOverridesRef.current = { ...(pendingOverridesRef.current || {}), ...overrides };
+            return;
+        }
         savingRef.current = true;
         setSaveStatus('saving');
 
@@ -83,6 +87,7 @@ export default function usePostData(initialData) {
             }));
 
             savedCounterRef.current = dirtyCounterRef.current;
+            initialDateRef.current = result.date;
             setSaveStatus('saved');
             setTimeout(() => setSaveStatus('idle'), 2000);
 
@@ -93,6 +98,12 @@ export default function usePostData(initialData) {
             throw err;
         } finally {
             savingRef.current = false;
+            // Process any queued overrides (e.g. Publish clicked during auto-save).
+            const pending = pendingOverridesRef.current;
+            if (pending) {
+                pendingOverridesRef.current = null;
+                savePost(pending).catch(() => {});
+            }
         }
     }, []);
 

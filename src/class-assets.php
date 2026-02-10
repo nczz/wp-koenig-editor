@@ -34,6 +34,16 @@ class Assets {
         wp_enqueue_media();
         wp_enqueue_script( 'heartbeat' );
 
+        // Attach post-lock refresh to heartbeat (runs after heartbeat.js loads).
+        global $post;
+        if ( $post ) {
+            $heartbeat_js = sprintf(
+                'jQuery(document).on("heartbeat-send",function(e,d){d["wp-refresh-post-lock"]={post_id:%d};});',
+                $post->ID
+            );
+            wp_add_inline_script( 'heartbeat', $heartbeat_js );
+        }
+
         // Editor JS bundle.
         $js_file = WP_KOENIG_PLUGIN_DIR . 'assets/js/koenig-editor.js';
         $js_url  = WP_KOENIG_PLUGIN_URL . 'assets/js/koenig-editor.js';

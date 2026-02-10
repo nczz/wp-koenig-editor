@@ -53,7 +53,7 @@ export default function App() {
         const handleKeyDown = (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
-                savePost();
+                savePost().catch(() => {});
             }
         };
         document.addEventListener('keydown', handleKeyDown);
