@@ -5,17 +5,31 @@ const config = window.wpKoenigConfig;
 /**
  * Card configuration for KoenigComposer.
  * Adapts Ghost's card system to use WordPress APIs.
+ *
+ * Koenig calls fetchEmbed(url, options) for both embed and bookmark cards:
+ * - Embed: fetchEmbed(url, {}) → expects { type, url, html, ... }
+ * - Bookmark: fetchEmbed(url, { type: 'bookmark' }) → expects { url, metadata: { title, description, ... } }
  */
 export const cardConfig = {
-    // oEmbed proxy for embed cards.
-    fetchEmbed: async (url) => {
-        const data = await apiFetch(`wp-koenig/v1/oembed?url=${encodeURIComponent(url)}`);
-        return data;
-    },
+    fetchEmbed: async (url, options = {}) => {
+        if (options.type === 'bookmark') {
+            // Bookmark card: fetch Open Graph / meta tags.
+            const meta = await apiFetch(`wp-koenig/v1/fetch-url-metadata?url=${encodeURIComponent(url)}`);
+            return {
+                url: meta.url,
+                metadata: {
+                    title: meta.title || '',
+                    description: meta.description || '',
+                    author: meta.author || '',
+                    publisher: meta.publisher || '',
+                    thumbnail: meta.thumbnail || '',
+                    icon: meta.icon || '',
+                },
+            };
+        }
 
-    // Bookmark card metadata fetcher.
-    fetchBookmarkMetadata: async (url) => {
-        const data = await apiFetch(`wp-koenig/v1/fetch-url-metadata?url=${encodeURIComponent(url)}`);
+        // Embed card: fetch oEmbed data.
+        const data = await apiFetch(`wp-koenig/v1/oembed?url=${encodeURIComponent(url)}`);
         return data;
     },
 
@@ -31,16 +45,7 @@ export const cardConfig = {
     // Site URL for relative link resolution.
     siteUrl: config.siteUrl,
 
-    // Disable Ghost-specific features.
-    feature: {
-        collections: false,
-        collectionsCard: false,
-        signup: false,
-        signupCard: false,
-        headerCard: false,
-    },
-
-    // Membership/monetization features are not applicable.
+    // Disable Ghost-specific membership/monetization features.
     membersEnabled: false,
     stripeEnabled: false,
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function PostStatusBar({ postData, saveStatus, onSave, onPublish, onToggleSidebar, backUrl }) {
+export default function PostStatusBar({ postData, saveStatus, onSave, onPublish, onToggleSidebar, backUrl, wordCount }) {
     const isPublished = postData.status === 'publish';
     const statusText = {
         idle: '',
@@ -24,6 +24,11 @@ export default function PostStatusBar({ postData, saveStatus, onSave, onPublish,
                 {statusText && (
                     <span className={`koenig-save-status koenig-save-status--${saveStatus}`}>
                         {statusText}
+                    </span>
+                )}
+                {wordCount !== null && wordCount !== undefined && (
+                    <span className="koenig-word-count">
+                        {wordCount} {wordCount === 1 ? 'word' : 'words'}
                     </span>
                 )}
             </div>
@@ -58,7 +63,7 @@ export default function PostStatusBar({ postData, saveStatus, onSave, onPublish,
                     onClick={onSave}
                     disabled={saveStatus === 'saving'}
                 >
-                    {saveStatus === 'saving' ? 'Saving...' : 'Save Draft'}
+                    {saveStatus === 'saving' ? 'Saving...' : (isPublished ? 'Save' : 'Save Draft')}
                 </button>
 
                 <button

@@ -93,6 +93,12 @@
     color: #f44336;
 }
 
+.koenig-word-count {
+    font-size: 13px;
+    color: #999;
+    margin-left: 12px;
+}
+
 /* ===== Buttons ===== */
 .koenig-btn {
     display: inline-flex;

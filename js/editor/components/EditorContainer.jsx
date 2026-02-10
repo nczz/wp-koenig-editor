@@ -1,10 +1,10 @@
 import React, { forwardRef, useImperativeHandle, useRef, useCallback, useMemo } from 'react';
-import { KoenigComposer, KoenigEditor, HtmlOutputPlugin } from '@tryghost/koenig-lexical';
+import { KoenigComposer, KoenigEditor, HtmlOutputPlugin, WordCountPlugin } from '@tryghost/koenig-lexical';
 import useFileUpload from '../hooks/useFileUpload';
 import { cardConfig } from '../utils/card-config';
 
 const EditorContainer = forwardRef(function EditorContainer(
-    { initialState, initialHtml, onStateChange, onHtmlChange, darkMode },
+    { initialState, initialHtml, onStateChange, onHtmlChange, onWordCountChange, darkMode, showWordCount },
     ref,
 ) {
     const editorAPIRef = useRef(null);
@@ -38,12 +38,19 @@ const EditorContainer = forwardRef(function EditorContainer(
         return undefined;
     }, [initialState]);
 
+    // Only pass html to HtmlOutputPlugin when there is NO Lexical state
+    // (i.e., importing from a legacy/classic post). When Lexical state exists,
+    // it is loaded via initialEditorState and HtmlOutputPlugin should NOT
+    // re-import HTML which would overwrite the richer Lexical JSON data.
+    const htmlForImport = initialEditorState ? '' : (initialHtml || '');
+
     return (
-        <div className={`koenig-editor-container ${darkMode ? 'dark' : ''}`}>
+        <div className="koenig-editor-container">
             <KoenigComposer
                 cardConfig={cardConfig}
                 fileUploader={fileUploader}
                 initialEditorState={initialEditorState}
+                darkMode={darkMode}
             >
                 <KoenigEditor
                     onChange={handleChange}
@@ -56,7 +63,10 @@ const EditorContainer = forwardRef(function EditorContainer(
                         }
                     }}
                 />
-                <HtmlOutputPlugin html={initialHtml} setHtml={onHtmlChange} />
+                <HtmlOutputPlugin html={htmlForImport} setHtml={onHtmlChange} />
+                {showWordCount && onWordCountChange && (
+                    <WordCountPlugin onChange={onWordCountChange} />
+                )}
             </KoenigComposer>
         </div>
     );

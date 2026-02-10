@@ -23,6 +23,8 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': path.resolve(__dirname, 'js/editor'),
+            // Koenig's package.json exports don't include CSS, alias to the file directly.
+            'koenig-lexical-styles': path.resolve(__dirname, 'node_modules/@tryghost/koenig-lexical/dist/index.css'),
         },
     },
     define: {

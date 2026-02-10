@@ -11,6 +11,7 @@ const config = window.wpKoenigConfig;
 export default function App() {
     const editorRef = useRef(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [wordCount, setWordCount] = useState(0);
 
     const {
         postData,
@@ -44,16 +45,20 @@ export default function App() {
     useAutoSave(isDirty, savePost);
 
     // Ctrl+S / Cmd+S keyboard shortcut to save.
+    // Use ref to avoid re-attaching listener on every postData change.
+    const savePostRef = useRef(savePost);
+    savePostRef.current = savePost;
+
     useEffect(() => {
         const handleKeyDown = (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
-                savePost();
+                savePostRef.current();
             }
         };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [savePost]);
+    }, []);
 
     return (
         <div className={`koenig-app ${config.darkMode ? 'dark' : ''}`}>
@@ -64,6 +69,7 @@ export default function App() {
                 onPublish={publishPost}
                 onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
                 backUrl={config.editPostListUrl}
+                wordCount={config.showWordCount ? wordCount : null}
             />
 
             <div className="koenig-editor-main">
@@ -79,7 +85,9 @@ export default function App() {
                         initialHtml={postData.content}
                         onStateChange={handleStateChange}
                         onHtmlChange={handleHtmlChange}
+                        onWordCountChange={setWordCount}
                         darkMode={config.darkMode}
+                        showWordCount={config.showWordCount}
                     />
                 </div>
             </div>

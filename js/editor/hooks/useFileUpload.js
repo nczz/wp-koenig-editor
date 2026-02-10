@@ -1,13 +1,31 @@
-import { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { uploadFile } from '../utils/api';
 
 /**
  * Implements the fileUploader interface expected by KoenigComposer.
- * Bridges Koenig's file upload to WordPress media library via REST API.
- * Provides reactive isLoading, errors, and progress state.
+ * Uses a ref-stable outer object to avoid re-rendering the entire editor
+ * tree on every upload state change. The inner useFileUpload hook returned
+ * by the outer object uses React state for reactive updates within cards.
  */
 export default function useFileUpload() {
-    // Shared state for the inner hook.
+    // The fileUploader object is created once and stays referentially stable.
+    // KoenigComposer stores it in context, so stability prevents full re-renders.
+    const fileUploaderRef = useRef(null);
+
+    if (!fileUploaderRef.current) {
+        fileUploaderRef.current = {
+            useFileUpload: createUseFileUploadHook,
+        };
+    }
+
+    return fileUploaderRef.current;
+}
+
+/**
+ * Inner hook called by Koenig card components.
+ * Each card instance gets its own isolated upload state.
+ */
+function createUseFileUploadHook() {
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState([]);
     const [progress, setProgress] = useState(0);
@@ -39,14 +57,5 @@ export default function useFileUpload() {
         return results;
     }, []);
 
-    const fileUploader = useMemo(() => ({
-        useFileUpload: () => ({
-            upload,
-            isLoading,
-            errors,
-            progress,
-        }),
-    }), [upload, isLoading, errors, progress]);
-
-    return fileUploader;
+    return { upload, isLoading, errors, progress };
 }

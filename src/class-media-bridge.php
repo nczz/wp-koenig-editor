@@ -58,13 +58,15 @@ class MediaBridge {
         $url      = wp_get_attachment_url( $attachment_id );
         $metadata = wp_get_attachment_metadata( $attachment_id );
         $filename = basename( get_attached_file( $attachment_id ) );
+        $width    = is_array( $metadata ) && isset( $metadata['width'] ) ? $metadata['width'] : null;
+        $height   = is_array( $metadata ) && isset( $metadata['height'] ) ? $metadata['height'] : null;
 
         return rest_ensure_response( array(
             'id'       => $attachment_id,
             'url'      => $url,
             'fileName' => $filename,
-            'width'    => $metadata['width'] ?? null,
-            'height'   => $metadata['height'] ?? null,
+            'width'    => $width,
+            'height'   => $height,
         ) );
     }
 }

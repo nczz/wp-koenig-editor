@@ -36,13 +36,16 @@ class Assets {
         // Editor JS bundle.
         $js_file = WP_KOENIG_PLUGIN_DIR . 'assets/js/koenig-editor.js';
         $js_url  = WP_KOENIG_PLUGIN_URL . 'assets/js/koenig-editor.js';
-        $version = file_exists( $js_file ) ? filemtime( $js_file ) : WP_KOENIG_VERSION;
+
+        if ( ! file_exists( $js_file ) ) {
+            return; // Build not available — skip loading.
+        }
 
         wp_enqueue_script(
             'wp-koenig-editor',
             $js_url,
             array(), // No WP dependencies — React is bundled.
-            $version,
+            filemtime( $js_file ),
             true
         );
 
