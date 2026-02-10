@@ -30,8 +30,9 @@ class Assets {
         // Dequeue Gutenberg scripts to avoid conflicts.
         $this->dequeue_gutenberg();
 
-        // Load WP media library.
+        // Load WP media library and heartbeat for post locking.
         wp_enqueue_media();
+        wp_enqueue_script( 'heartbeat' );
 
         // Editor JS bundle.
         $js_file = WP_KOENIG_PLUGIN_DIR . 'assets/js/koenig-editor.js';

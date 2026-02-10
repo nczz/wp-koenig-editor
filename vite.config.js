@@ -10,6 +10,8 @@ export default defineConfig({
         rollupOptions: {
             input: path.resolve(__dirname, 'js/editor/index.jsx'),
             output: {
+                format: 'iife',
+                name: 'WPKoenigEditor',
                 entryFileNames: 'koenig-editor.js',
                 assetFileNames: 'koenig-editor.[ext]',
                 // Bundle everything into a single chunk.

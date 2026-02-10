@@ -42,23 +42,23 @@ export default function App() {
         }
     }, []);
 
+    const handleToggleSidebar = useCallback(() => {
+        setSidebarOpen((prev) => !prev);
+    }, []);
+
     useAutoSave(isDirty, savePost);
 
     // Ctrl+S / Cmd+S keyboard shortcut to save.
-    // Use ref to avoid re-attaching listener on every postData change.
-    const savePostRef = useRef(savePost);
-    savePostRef.current = savePost;
-
     useEffect(() => {
         const handleKeyDown = (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
-                savePostRef.current();
+                savePost();
             }
         };
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
-    }, []);
+    }, [savePost]);
 
     return (
         <div className={`koenig-app ${config.darkMode ? 'dark' : ''}`}>
@@ -67,7 +67,7 @@ export default function App() {
                 saveStatus={saveStatus}
                 onSave={savePost}
                 onPublish={publishPost}
-                onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+                onToggleSidebar={handleToggleSidebar}
                 backUrl={config.editPostListUrl}
                 wordCount={config.showWordCount ? wordCount : null}
             />

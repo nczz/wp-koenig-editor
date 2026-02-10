@@ -1,6 +1,5 @@
 node_modules/
 assets/js/
-package-lock.json
 .DS_Store
 Thumbs.db
 *.log

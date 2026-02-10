@@ -50,9 +50,31 @@ $show_word_count = get_option( 'wp_koenig_show_word_count', true );
 </style>
 
 <div class="koenig-editor-wrap">
+    <?php if ( ! empty( $lock_holder ) ) : ?>
+    <div class="koenig-post-lock-warning" style="background:#fff3cd;color:#856404;padding:10px 20px;text-align:center;font-size:14px;border-bottom:1px solid #ffc107;">
+        <?php
+        printf(
+            /* translators: %s: user display name */
+            esc_html__( '%s is currently editing this post. If you take over, the other user will lose unsaved changes.', 'wp-koenig-editor' ),
+            '<strong>' . esc_html( $lock_holder ) . '</strong>'
+        );
+        ?>
+    </div>
+    <?php endif; ?>
     <div id="koenig-editor-root"></div>
 </div>
 
+<script>
+    // Heartbeat: refresh post lock so other users see our lock.
+    (function() {
+        if (typeof jQuery !== 'undefined' && typeof wp !== 'undefined' && wp.heartbeat) {
+            var postId = <?php echo (int) $post_data['id']; ?>;
+            jQuery(document).on('heartbeat-send', function(e, data) {
+                data['wp-refresh-post-lock'] = { post_id: postId };
+            });
+        }
+    })();
+</script>
 <script>
     window.wpKoenigConfig = {
         postData: <?php echo wp_json_encode( $post_data ); ?>,

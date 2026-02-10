@@ -45,6 +45,11 @@ class PostStorage {
      * Write lexical_state to post_content_filtered and mark post as Koenig-edited.
      */
     public function update_lexical_state( $value, $post ) {
+        // Validate that the value is valid JSON (or empty).
+        if ( '' !== $value && null === json_decode( $value ) ) {
+            return;
+        }
+
         global $wpdb;
 
         // Update post_content_filtered directly to avoid recursive hooks.
@@ -63,23 +68,27 @@ class PostStorage {
     }
 
     /**
-     * Include post_content_filtered in revision fields.
+     * Include post_content_filtered in revision fields for Koenig posts.
+     *
+     * WordPress stores the filter result back into a static variable,
+     * so we must explicitly add OR remove the key on every call to
+     * prevent leaking the field to non-Koenig posts.
      */
     public function add_revision_field( $fields, $post ) {
-        // $post is an array with 'ID' key in this filter context.
-        // Only add the field for posts edited with Koenig.
-        if ( ! is_array( $post ) || empty( $post['ID'] ) ) {
-            return $fields;
+        $is_koenig = false;
+
+        if ( is_array( $post ) && ! empty( $post['ID'] ) ) {
+            $parent_id = wp_is_post_revision( $post['ID'] );
+            $check_id  = $parent_id ? $parent_id : $post['ID'];
+            $is_koenig = (bool) get_post_meta( $check_id, '_wp_koenig_editor', true );
         }
 
-        $parent_id = wp_is_post_revision( $post['ID'] );
-        $check_id  = $parent_id ? $parent_id : $post['ID'];
-
-        if ( ! get_post_meta( $check_id, '_wp_koenig_editor', true ) ) {
-            return $fields;
+        if ( $is_koenig ) {
+            $fields['post_content_filtered'] = __( 'Lexical State', 'wp-koenig-editor' );
+        } else {
+            unset( $fields['post_content_filtered'] );
         }
 
-        $fields['post_content_filtered'] = __( 'Lexical State', 'wp-koenig-editor' );
         return $fields;
     }
 

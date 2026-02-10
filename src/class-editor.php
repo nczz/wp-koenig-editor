@@ -31,6 +31,14 @@ class Editor {
             return $replace;
         }
 
+        // Post lock: warn if another user is editing, then set our lock.
+        $lock_user = wp_check_post_lock( $post->ID );
+        if ( $lock_user ) {
+            $lock_user_data = get_userdata( $lock_user );
+            $lock_holder    = $lock_user_data ? $lock_user_data->display_name : __( 'Another user', 'wp-koenig-editor' );
+        }
+        wp_set_post_lock( $post->ID );
+
         // Prepare post data for the React app.
         $post_data = $this->get_post_data( $post );
 
@@ -49,7 +57,7 @@ class Editor {
         $is_koenig     = get_post_meta( $post->ID, '_wp_koenig_editor', true );
         $post_type     = get_post_type( $post );
         $type_object   = get_post_type_object( $post_type );
-        $rest_base     = $type_object && ! empty( $type_object->rest_base ) ? $type_object->rest_base : $post_type . 's';
+        $rest_base     = $type_object && ! empty( $type_object->rest_base ) ? $type_object->rest_base : $post_type;
 
         return array(
             'id'             => $post->ID,

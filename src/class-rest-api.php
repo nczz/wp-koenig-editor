@@ -136,7 +136,7 @@ class RestAPI {
                 if ( preg_match( '/(?:property|name)\s*=\s*["\']([^"\']+)["\']/i', $tag, $m ) ) {
                     $name = strtolower( $m[1] );
                 }
-                if ( preg_match( '/content\s*=\s*["\']([^"\']*?)["\']/i', $tag, $m ) ) {
+                if ( preg_match( '/content\s*=\s*"([^"]*)"/i', $tag, $m ) || preg_match( "/content\s*=\s*'([^']*)'/i", $tag, $m ) ) {
                     $content = $m[1];
                 }
 

@@ -95,7 +95,7 @@ This dual-field approach is proven by [wp-githuber-md](https://github.com/terryl
 | `wp-koenig/v1/oembed?url=` | GET | oEmbed proxy |
 | `wp-koenig/v1/fetch-url-metadata?url=` | GET | Open Graph metadata for bookmark cards |
 
-All endpoints require `edit_posts` capability.
+The upload endpoint requires `upload_files` capability; other endpoints require `edit_posts`.
 
 ## License
 

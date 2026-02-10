@@ -6,20 +6,25 @@ export default function FeaturedImage({ mediaId, onChange }) {
     const [imageUrl, setImageUrl] = useState('');
     const openMediaLibrary = useMediaLibrary();
 
-    // Fetch current featured image URL.
+    // Fetch current featured image URL with abort on rapid changes.
     useEffect(() => {
         if (!mediaId) {
             setImageUrl('');
             return;
         }
+        let cancelled = false;
         apiFetch(`wp/v2/media/${mediaId}`)
             .then((media) => {
+                if (cancelled) return;
                 const url = media?.media_details?.sizes?.medium?.source_url
                     || media?.source_url
                     || '';
                 setImageUrl(url);
             })
-            .catch(() => setImageUrl(''));
+            .catch(() => {
+                if (!cancelled) setImageUrl('');
+            });
+        return () => { cancelled = true; };
     }, [mediaId]);
 
     const handleSelect = useCallback(() => {

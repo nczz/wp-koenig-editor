@@ -23,6 +23,9 @@ export default function usePostData(initialData) {
     const dirtyCounterRef = useRef(0);
     const savedCounterRef = useRef(0);
     const savingRef = useRef(false);
+    const postDataRef = useRef(postData);
+    postDataRef.current = postData;
+    const initialDateRef = useRef(initialData.date || '');
 
     // Wrap setPostData to track dirty state via counter.
     const setPostDataTracked = useCallback((updater) => {
@@ -38,7 +41,7 @@ export default function usePostData(initialData) {
         savingRef.current = true;
         setSaveStatus('saving');
 
-        const dataToSave = { ...postData, ...overrides };
+        const dataToSave = { ...postDataRef.current, ...overrides };
         const restBase = dataToSave.rest_base || 'posts';
         const endpoint = `wp/v2/${restBase}/${dataToSave.id}`;
 
@@ -55,9 +58,14 @@ export default function usePostData(initialData) {
                 lexical_state: dataToSave.lexical_state,
             };
 
-            // Only send date if it was explicitly changed from the initial value.
-            if (dataToSave.date) {
-                body.date = dataToSave.date;
+            // Only send date if the user explicitly changed it from the initial value.
+            if (dataToSave.date && dataToSave.date !== initialDateRef.current) {
+                // Ensure full ISO 8601 format (datetime-local may omit seconds).
+                let dateVal = dataToSave.date;
+                if (dateVal.length === 16) {
+                    dateVal += ':00';
+                }
+                body.date = dateVal;
             }
 
             const result = await apiFetch(endpoint, {
@@ -86,7 +94,7 @@ export default function usePostData(initialData) {
         } finally {
             savingRef.current = false;
         }
-    }, [postData]);
+    }, []);
 
     const publishPost = useCallback(async () => {
         return savePost({ status: 'publish' });
