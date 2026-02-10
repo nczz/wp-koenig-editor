@@ -276,6 +276,7 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
+    scroll-padding-bottom: 40vh;   /* keep cursor away from bottom edge */
     display: flex;
     justify-content: center;
 }
@@ -283,21 +284,21 @@
 .koenig-editor-content {
     width: 100%;
     max-width: var(--koenig-content-max-width);
-    padding: var(--koenig-spacing-2xl) var(--koenig-spacing-xl) 100px;
+    padding: var(--koenig-spacing-2xl) var(--koenig-spacing-xl) 60vh;
     margin: 0 auto;
 }
 
 /* Content — Tablet (≤ 782px) */
 @media screen and (max-width: 782px) {
     .koenig-editor-content {
-        padding: var(--koenig-spacing-xl) var(--koenig-spacing-lg) 80px;
+        padding: var(--koenig-spacing-xl) var(--koenig-spacing-lg) 60vh;
     }
 }
 
 /* Content — Small mobile (≤ 480px) */
 @media screen and (max-width: 480px) {
     .koenig-editor-content {
-        padding: var(--koenig-spacing-lg) var(--koenig-spacing-md) 60px;
+        padding: var(--koenig-spacing-lg) var(--koenig-spacing-md) 60vh;
     }
 }
 
@@ -345,6 +346,67 @@
 /* ===== Editor Container ===== */
 .koenig-editor-container {
     min-height: 300px;
+}
+
+/* Scroll margin: when browser auto-scrolls to keep the caret visible,
+   leave space below so the cursor never sticks to the viewport bottom. */
+.koenig-lexical .kg-prose > * {
+    scroll-margin-bottom: 40vh;
+}
+
+/* ===== Koenig kg-prose Typography Overrides =====
+ * Ghost's defaults (2rem / georgia) are too large for WP admin.
+ * Scale down to match a clean blog-writing experience.
+ */
+.koenig-lexical .kg-prose :where(p, blockquote, aside, ul, ol):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    font-family: var(--koenig-font-family);
+    font-size: 1.125rem;    /* 18px */
+    line-height: 1.75;
+}
+
+.koenig-lexical .kg-prose :where(h1):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    font-size: 2.25rem;     /* 36px */
+}
+
+.koenig-lexical .kg-prose :where(h2):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    font-size: 1.875rem;    /* 30px */
+}
+
+.koenig-lexical .kg-prose :where(h3):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    font-size: 1.5rem;      /* 24px */
+}
+
+.koenig-lexical .kg-prose :where(h4):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    font-size: 1.25rem;     /* 20px */
+}
+
+.koenig-lexical .kg-prose :where(h5):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    font-size: 1.125rem;    /* 18px */
+}
+
+.koenig-lexical .kg-prose :where(h6):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    font-size: 1rem;        /* 16px */
+}
+
+.koenig-lexical .kg-prose :where(ul li):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)),
+.koenig-lexical .kg-prose :where(ol li):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    line-height: 1.75;
+}
+
+.koenig-lexical .kg-prose :where(aside):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    font-size: 1.25rem;     /* 20px */
+}
+
+@media (max-width: 500px) {
+    .koenig-lexical .kg-prose :where(p, blockquote, aside, ul, ol):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+        font-size: 1rem;    /* 16px on mobile */
+    }
+    .koenig-lexical .kg-prose :where(h1):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+        font-size: 1.75rem;
+    }
+    .koenig-lexical .kg-prose :where(h2):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+        font-size: 1.5rem;
+    }
 }
 
 /* ===== Sidebar ===== */
