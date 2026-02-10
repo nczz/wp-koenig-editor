@@ -26,7 +26,7 @@ $show_word_count = get_option( 'wp_koenig_show_word_count', true );
         left: 0;
         right: 0;
         bottom: 0;
-        z-index: 99999;
+        z-index: 9999; /* Below #wpadminbar (99999) so admin bar dropdowns & Query Monitor work */
         background: <?php echo $dark_mode ? '#1a1a2e' : '#ffffff'; ?>;
         display: flex;
         flex-direction: column;
@@ -51,7 +51,7 @@ $show_word_count = get_option( 'wp_koenig_show_word_count', true );
 
 <div class="koenig-editor-wrap">
     <?php if ( ! empty( $lock_holder ) ) : ?>
-    <div class="koenig-post-lock-warning" style="background:#fff3cd;color:#856404;padding:10px 20px;text-align:center;font-size:14px;border-bottom:1px solid #ffc107;">
+    <div class="koenig-post-lock-warning">
         <?php
         printf(
             /* translators: %s: user display name */
