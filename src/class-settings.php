@@ -81,7 +81,7 @@ class Settings {
 
     public function sanitize_post_types( $input ) {
         if ( ! is_array( $input ) ) {
-            return array( 'post' );
+            return array();
         }
         $valid_types = get_post_types( array( 'show_ui' => true ), 'names' );
         return array_values( array_intersect( $input, $valid_types ) );
@@ -93,6 +93,9 @@ class Settings {
 
         // Exclude built-in non-content types.
         unset( $post_types['attachment'], $post_types['wp_block'], $post_types['wp_template'], $post_types['wp_template_part'], $post_types['wp_navigation'] );
+
+        // Hidden field ensures the key is always present in POST, even when no checkboxes are checked.
+        echo '<input type="hidden" name="wp_koenig_enabled_post_types" value="" />';
 
         foreach ( $post_types as $type ) {
             $checked = in_array( $type->name, $enabled, true ) ? 'checked' : '';

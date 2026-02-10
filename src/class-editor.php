@@ -10,7 +10,7 @@ class Editor {
 
     public function __construct() {
         add_filter( 'use_block_editor_for_post', array( $this, 'disable_gutenberg' ), 100, 2 );
-        add_action( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
+        add_filter( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
     }
 
     /**
@@ -46,9 +46,10 @@ class Editor {
      */
     private function get_post_data( $post ) {
         $lexical_state = $post->post_content_filtered;
-
-        // Check if this post was created with Koenig.
-        $is_koenig = get_post_meta( $post->ID, '_wp_koenig_editor', true );
+        $is_koenig     = get_post_meta( $post->ID, '_wp_koenig_editor', true );
+        $post_type     = get_post_type( $post );
+        $type_object   = get_post_type_object( $post_type );
+        $rest_base     = $type_object && ! empty( $type_object->rest_base ) ? $type_object->rest_base : $post_type . 's';
 
         return array(
             'id'             => $post->ID,
@@ -58,13 +59,15 @@ class Editor {
             'status'         => $post->post_status,
             'slug'           => $post->post_name,
             'excerpt'        => $post->post_excerpt,
-            'date'           => $post->post_date,
-            'modified'       => $post->post_modified,
+            'date'           => mysql2date( 'c', $post->post_date ),
+            'modified'       => mysql2date( 'c', $post->post_modified ),
             'featured_media' => (int) get_post_thumbnail_id( $post->ID ),
             'categories'     => wp_get_post_categories( $post->ID ),
             'tags'           => wp_get_post_tags( $post->ID, array( 'fields' => 'ids' ) ),
             'is_koenig'      => (bool) $is_koenig,
-            'post_type'      => get_post_type( $post ),
+            'post_type'      => $post_type,
+            'rest_base'      => $rest_base,
+            'preview_url'    => get_preview_post_link( $post ),
         );
     }
 }

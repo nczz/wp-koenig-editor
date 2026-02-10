@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import PostStatusBar from './components/PostStatusBar';
 import TitleField from './components/TitleField';
 import EditorContainer from './components/EditorContainer';
@@ -25,12 +25,14 @@ export default function App() {
         setPostData((prev) => ({ ...prev, title }));
     }, [setPostData]);
 
-    const handleEditorChange = useCallback((editorState, htmlContent) => {
-        setPostData((prev) => ({
-            ...prev,
-            lexical_state: JSON.stringify(editorState),
-            content: htmlContent,
-        }));
+    // KoenigEditor onChange: receives editor state as JSON string (already serialized by EditorContainer).
+    const handleStateChange = useCallback((lexicalJson) => {
+        setPostData((prev) => ({ ...prev, lexical_state: lexicalJson }));
+    }, [setPostData]);
+
+    // HtmlOutputPlugin setHtml: receives rendered HTML string.
+    const handleHtmlChange = useCallback((html) => {
+        setPostData((prev) => ({ ...prev, content: html }));
     }, [setPostData]);
 
     const handleTitleEnter = useCallback(() => {
@@ -40,6 +42,18 @@ export default function App() {
     }, []);
 
     useAutoSave(isDirty, savePost);
+
+    // Ctrl+S / Cmd+S keyboard shortcut to save.
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                savePost();
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [savePost]);
 
     return (
         <div className={`koenig-app ${config.darkMode ? 'dark' : ''}`}>
@@ -62,7 +76,9 @@ export default function App() {
                     <EditorContainer
                         ref={editorRef}
                         initialState={postData.lexical_state}
-                        onChange={handleEditorChange}
+                        initialHtml={postData.content}
+                        onStateChange={handleStateChange}
+                        onHtmlChange={handleHtmlChange}
                         darkMode={config.darkMode}
                     />
                 </div>

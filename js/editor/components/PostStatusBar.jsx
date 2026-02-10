@@ -29,9 +29,9 @@ export default function PostStatusBar({ postData, saveStatus, onSave, onPublish,
             </div>
 
             <div className="koenig-status-bar__right">
-                {postData.id > 0 && (
+                {postData.preview_url && (
                     <a
-                        href={`/?p=${postData.id}&preview=true`}
+                        href={postData.preview_url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="koenig-btn koenig-btn--text"
@@ -41,6 +41,7 @@ export default function PostStatusBar({ postData, saveStatus, onSave, onPublish,
                 )}
 
                 <button
+                    type="button"
                     className="koenig-btn koenig-btn--icon"
                     onClick={onToggleSidebar}
                     title="Post settings"
@@ -52,6 +53,7 @@ export default function PostStatusBar({ postData, saveStatus, onSave, onPublish,
                 </button>
 
                 <button
+                    type="button"
                     className="koenig-btn koenig-btn--secondary"
                     onClick={onSave}
                     disabled={saveStatus === 'saving'}
@@ -60,6 +62,7 @@ export default function PostStatusBar({ postData, saveStatus, onSave, onPublish,
                 </button>
 
                 <button
+                    type="button"
                     className="koenig-btn koenig-btn--primary"
                     onClick={onPublish}
                     disabled={saveStatus === 'saving'}

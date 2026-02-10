@@ -86,9 +86,16 @@ class RestAPI {
             return new \WP_Error( 'missing_url', 'URL is required.', array( 'status' => 400 ) );
         }
 
-        $response = wp_remote_get( $url, array(
+        // Validate URL scheme and use wp_safe_remote_get to prevent SSRF.
+        $scheme = wp_parse_url( $url, PHP_URL_SCHEME );
+        if ( ! in_array( $scheme, array( 'http', 'https' ), true ) ) {
+            return new \WP_Error( 'invalid_scheme', 'Only HTTP(S) URLs are allowed.', array( 'status' => 400 ) );
+        }
+
+        $response = wp_safe_remote_get( $url, array(
             'timeout'    => 10,
             'user-agent' => 'Mozilla/5.0 (compatible; WPKoenigEditor/' . WP_KOENIG_VERSION . ')',
+            'reject_unsafe_urls' => true,
         ) );
 
         if ( is_wp_error( $response ) ) {

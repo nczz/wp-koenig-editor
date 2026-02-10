@@ -7,7 +7,6 @@ import { apiFetch } from '../utils/api';
 export default function usePostData(initialData) {
     const [postData, setPostData] = useState({
         ...initialData,
-        // Ensure we have default values.
         title: initialData.title || '',
         content: initialData.content || '',
         lexical_state: initialData.lexical_state || '',
@@ -20,22 +19,27 @@ export default function usePostData(initialData) {
     });
 
     const [saveStatus, setSaveStatus] = useState('idle'); // idle | saving | saved | error
-    const lastSavedRef = useRef(JSON.stringify(initialData));
+    const dirtyCounterRef = useRef(0);
+    const savedCounterRef = useRef(0);
 
-    const isDirty = JSON.stringify(postData) !== lastSavedRef.current;
+    // Wrap setPostData to track dirty state via counter.
+    const setPostDataTracked = useCallback((updater) => {
+        setPostData(updater);
+        dirtyCounterRef.current += 1;
+    }, []);
+
+    const isDirty = dirtyCounterRef.current !== savedCounterRef.current;
 
     const savePost = useCallback(async (overrides = {}) => {
         setSaveStatus('saving');
 
         const dataToSave = { ...postData, ...overrides };
-        const postType = dataToSave.post_type || 'post';
-        const endpoint = postType === 'post'
-            ? `wp/v2/posts/${dataToSave.id}`
-            : `wp/v2/${postType}/${dataToSave.id}`;
+        const restBase = dataToSave.rest_base || 'posts';
+        const endpoint = `wp/v2/${restBase}/${dataToSave.id}`;
 
         try {
             const result = await apiFetch(endpoint, {
-                method: 'PUT',
+                method: 'POST',
                 body: JSON.stringify({
                     title: dataToSave.title,
                     content: dataToSave.content,
@@ -49,7 +53,6 @@ export default function usePostData(initialData) {
                 }),
             });
 
-            // Update post data with server response.
             setPostData((prev) => ({
                 ...prev,
                 id: result.id,
@@ -59,10 +62,8 @@ export default function usePostData(initialData) {
                 modified: result.modified,
             }));
 
-            lastSavedRef.current = JSON.stringify({ ...dataToSave, ...result });
+            savedCounterRef.current = dirtyCounterRef.current;
             setSaveStatus('saved');
-
-            // Reset status after 2 seconds.
             setTimeout(() => setSaveStatus('idle'), 2000);
 
             return result;
@@ -74,13 +75,12 @@ export default function usePostData(initialData) {
     }, [postData]);
 
     const publishPost = useCallback(async () => {
-        const newStatus = postData.status === 'publish' ? 'publish' : 'publish';
-        return savePost({ status: newStatus });
-    }, [postData.status, savePost]);
+        return savePost({ status: 'publish' });
+    }, [savePost]);
 
     return {
         postData,
-        setPostData,
+        setPostData: setPostDataTracked,
         savePost,
         publishPost,
         saveStatus,
