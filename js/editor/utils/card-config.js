@@ -34,12 +34,21 @@ export const cardConfig = {
     },
 
     // Internal link search for link toolbar.
+    // Koenig expects grouped format: [{ label: "Group", items: [{ label, value }] }]
+    // Called with no arguments on mount for default suggestions.
     searchLinks: async (term) => {
-        const results = await apiFetch(`wp/v2/search?search=${encodeURIComponent(term)}&type=post&per_page=5`);
-        return results.map((item) => ({
-            title: item.title,
-            url: item.url,
-        }));
+        const query = term ? `search=${encodeURIComponent(term)}&` : '';
+        const results = await apiFetch(`wp/v2/search?${query}type=post&per_page=5`);
+        if (!results || !results.length) {
+            return [];
+        }
+        return [{
+            label: 'Posts',
+            items: results.map((item) => ({
+                label: item.title,
+                value: item.url,
+            })),
+        }];
     },
 
     // Site URL for relative link resolution.
