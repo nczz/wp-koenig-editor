@@ -22,7 +22,11 @@ export default function PostStatusBar({ postData, saveStatus, onSave, onPublish,
 
             <div className="koenig-status-bar__center">
                 {statusText && (
-                    <span className={`koenig-save-status koenig-save-status--${saveStatus}`}>
+                    <span
+                        className={`koenig-save-status koenig-save-status--${saveStatus}`}
+                        role="status"
+                        aria-live="polite"
+                    >
                         {statusText}
                     </span>
                 )}

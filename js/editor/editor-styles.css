@@ -20,6 +20,8 @@
   --koenig-color-error: #d63638;
   --koenig-color-success: #00a32a;
   --koenig-color-focus-ring: #3582c4;
+  --koenig-color-title: #1a1a1a;
+  --koenig-color-placeholder: #a7aaad;
 
   /* === Typography === */
   --koenig-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -67,6 +69,8 @@
   --koenig-color-border-input: #3a3a5a;
   --koenig-color-bg: #1a1a2e;
   --koenig-color-bg-page: #16213e;
+  --koenig-color-title: #f0f0f0;
+  --koenig-color-placeholder: #555;
 }
 
 /* React mount point — must fill the fixed wrapper and constrain children */
@@ -96,7 +100,8 @@
     border-bottom: 1px solid var(--koenig-color-border);
     background: var(--koenig-color-secondary-bg);
     flex-shrink: 0;
-    z-index: var(--koenig-z-statusbar);
+    position: relative;
+    z-index: var(--koenig-z-sidebar);
 }
 
 .koenig-status-bar__left,
@@ -314,7 +319,7 @@
     font-weight: 700;
     line-height: 1.25;
     letter-spacing: -0.02em;
-    color: #1a1a1a;
+    color: var(--koenig-color-title);
     background: transparent;
     padding: 0;
     margin-bottom: var(--koenig-spacing-sm);
@@ -322,15 +327,7 @@
 }
 
 .koenig-title-field::placeholder {
-    color: var(--koenig-color-text-disabled);
-}
-
-.dark .koenig-title-field {
-    color: #f0f0f0;
-}
-
-.dark .koenig-title-field::placeholder {
-    color: #555;
+    color: var(--koenig-color-placeholder);
 }
 
 /* Title — Tablet (≤ 782px) */
@@ -397,6 +394,26 @@
     font-size: 1.25rem;     /* 20px */
 }
 
+/* Paragraph spacing — tighter than Koenig default (~51px → 24px) */
+.koenig-lexical .kg-prose :where(p, blockquote, aside, ul, ol):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    margin-top: 1.5rem;     /* 24px — closer to Gutenberg's ~28px */
+}
+
+/* Heading pre-spacing — more breathing room before headings */
+.koenig-lexical .kg-prose :where(
+  p + h1, p + h2, p + h3, p + h4, p + h5, p + h6,
+  ul + h1, ul + h2, ul + h3, ul + h4, ul + h5, ul + h6,
+  ol + h1, ol + h2, ol + h3, ol + h4, ol + h5, ol + h6,
+  blockquote + h1, blockquote + h2, blockquote + h3, blockquote + h4, blockquote + h5, blockquote + h6
+):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    margin-top: 2.5rem;     /* 40px */
+}
+
+/* Heading post-spacing — tighter connection between heading and body */
+.koenig-lexical .kg-prose :where(h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
+    margin-top: 0.75rem;    /* 12px */
+}
+
 @media (max-width: 500px) {
     .koenig-lexical .kg-prose :where(p, blockquote, aside, ul, ol):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
         font-size: 1rem;    /* 16px on mobile */
@@ -407,6 +424,12 @@
     .koenig-lexical .kg-prose :where(h2):not(:where(.not-kg-prose, [class~="not-kg-prose"] *)) {
         font-size: 1.5rem;
     }
+}
+
+/* + button — scale down from 57.6px to ~46px */
+.koenig-lexical [data-kg-plus-button] {
+    transform: scale(0.8);
+    transform-origin: left center;
 }
 
 /* ===== Sidebar ===== */
@@ -516,6 +539,10 @@
     box-sizing: border-box;
 }
 
+.koenig-sidebar__field textarea {
+    resize: vertical;
+}
+
 /* WP admin focus double-ring */
 .koenig-sidebar__field input:focus,
 .koenig-sidebar__field textarea:focus,
@@ -560,14 +587,14 @@
     padding: 4px 10px;
     font-size: 13px;
     border: none;
-    background: #eee;
+    background: var(--koenig-color-secondary-bg);
     border-radius: 3px;
     cursor: pointer;
-    color: #555;
+    color: var(--koenig-color-text-secondary);
 }
 
 .koenig-featured-image__actions button:hover {
-    background: #ddd;
+    background: var(--koenig-color-secondary-hover);
 }
 
 /* ===== Taxonomy Selector ===== */
@@ -635,7 +662,7 @@
     padding: var(--koenig-spacing-md);
     border-radius: var(--koenig-border-radius);
     font-size: var(--koenig-font-size-base);
-    color: #8b0000;
+    color: var(--koenig-color-error);
     text-align: left;
     overflow: auto;
     margin-bottom: 24px;
