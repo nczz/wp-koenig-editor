@@ -13,6 +13,7 @@ export default function usePostData(initialData) {
         status: initialData.status || 'draft',
         slug: initialData.slug || '',
         excerpt: initialData.excerpt || '',
+        date: initialData.date || '',
         categories: initialData.categories || [],
         tags: initialData.tags || [],
         featured_media: initialData.featured_media || 0,
@@ -21,6 +22,7 @@ export default function usePostData(initialData) {
     const [saveStatus, setSaveStatus] = useState('idle'); // idle | saving | saved | error
     const dirtyCounterRef = useRef(0);
     const savedCounterRef = useRef(0);
+    const savingRef = useRef(false);
 
     // Wrap setPostData to track dirty state via counter.
     const setPostDataTracked = useCallback((updater) => {
@@ -31,6 +33,9 @@ export default function usePostData(initialData) {
     const isDirty = dirtyCounterRef.current !== savedCounterRef.current;
 
     const savePost = useCallback(async (overrides = {}) => {
+        // Deduplicate: skip if already saving.
+        if (savingRef.current) return;
+        savingRef.current = true;
         setSaveStatus('saving');
 
         const dataToSave = { ...postData, ...overrides };
@@ -38,19 +43,26 @@ export default function usePostData(initialData) {
         const endpoint = `wp/v2/${restBase}/${dataToSave.id}`;
 
         try {
+            const body = {
+                title: dataToSave.title,
+                content: dataToSave.content,
+                status: dataToSave.status,
+                slug: dataToSave.slug,
+                excerpt: dataToSave.excerpt,
+                categories: dataToSave.categories,
+                tags: dataToSave.tags,
+                featured_media: dataToSave.featured_media,
+                lexical_state: dataToSave.lexical_state,
+            };
+
+            // Only send date if it was explicitly changed from the initial value.
+            if (dataToSave.date) {
+                body.date = dataToSave.date;
+            }
+
             const result = await apiFetch(endpoint, {
                 method: 'POST',
-                body: JSON.stringify({
-                    title: dataToSave.title,
-                    content: dataToSave.content,
-                    status: dataToSave.status,
-                    slug: dataToSave.slug,
-                    excerpt: dataToSave.excerpt,
-                    categories: dataToSave.categories,
-                    tags: dataToSave.tags,
-                    featured_media: dataToSave.featured_media,
-                    lexical_state: dataToSave.lexical_state,
-                }),
+                body: JSON.stringify(body),
             });
 
             setPostData((prev) => ({
@@ -71,6 +83,8 @@ export default function usePostData(initialData) {
             setSaveStatus('error');
             setTimeout(() => setSaveStatus('idle'), 3000);
             throw err;
+        } finally {
+            savingRef.current = false;
         }
     }, [postData]);
 

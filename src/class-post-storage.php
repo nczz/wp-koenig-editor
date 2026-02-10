@@ -67,12 +67,16 @@ class PostStorage {
      */
     public function add_revision_field( $fields, $post ) {
         // $post is an array with 'ID' key in this filter context.
-        if ( is_array( $post ) && ! empty( $post['ID'] ) ) {
-            $parent_id = wp_is_post_revision( $post['ID'] );
-            $check_id  = $parent_id ? $parent_id : $post['ID'];
-            if ( ! get_post_meta( $check_id, '_wp_koenig_editor', true ) ) {
-                return $fields;
-            }
+        // Only add the field for posts edited with Koenig.
+        if ( ! is_array( $post ) || empty( $post['ID'] ) ) {
+            return $fields;
+        }
+
+        $parent_id = wp_is_post_revision( $post['ID'] );
+        $check_id  = $parent_id ? $parent_id : $post['ID'];
+
+        if ( ! get_post_meta( $check_id, '_wp_koenig_editor', true ) ) {
+            return $fields;
         }
 
         $fields['post_content_filtered'] = __( 'Lexical State', 'wp-koenig-editor' );

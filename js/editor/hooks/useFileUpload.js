@@ -14,7 +14,7 @@ export default function useFileUpload() {
 
     if (!fileUploaderRef.current) {
         fileUploaderRef.current = {
-            useFileUpload: createUseFileUploadHook,
+            useFileUpload: useFileUploadState,
         };
     }
 
@@ -24,8 +24,9 @@ export default function useFileUpload() {
 /**
  * Inner hook called by Koenig card components.
  * Each card instance gets its own isolated upload state.
+ * Must start with "use" to comply with React's rules of hooks.
  */
-function createUseFileUploadHook() {
+function useFileUploadState() {
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState([]);
     const [progress, setProgress] = useState(0);

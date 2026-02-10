@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import FeaturedImage from './FeaturedImage';
 import TaxonomySelector from './TaxonomySelector';
 
@@ -6,6 +6,17 @@ export default function PostSettingsSidebar({ postData, setPostData, onClose }) 
     const handleFieldChange = useCallback((field, value) => {
         setPostData((prev) => ({ ...prev, [field]: value }));
     }, [setPostData]);
+
+    // Close sidebar on Escape key.
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                onClose();
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [onClose]);
 
     return (
         <>
