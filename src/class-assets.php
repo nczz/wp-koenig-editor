@@ -76,23 +76,38 @@ class Assets {
 
     /**
      * Dequeue Gutenberg-related scripts to prevent conflicts.
+     *
+     * Only dequeue+deregister high-level Gutenberg UI scripts.
+     * Low-level scripts (wp-block-editor, wp-blocks, wp-editor) must NOT
+     * be deregistered because wp-core-data and wp-core-commands depend on them.
+     * Deregistering breaks the dependency chain and causes QM warnings.
      */
     private function dequeue_gutenberg() {
-        $scripts_to_remove = array(
+        // High-level Gutenberg UI: safe to fully remove.
+        $scripts_to_deregister = array(
             'wp-edit-post',
-            'wp-editor',
-            'wp-block-editor',
             'wp-block-library',
-            'wp-blocks',
             'wp-format-library',
         );
 
-        foreach ( $scripts_to_remove as $handle ) {
+        foreach ( $scripts_to_deregister as $handle ) {
             wp_dequeue_script( $handle );
             wp_deregister_script( $handle );
         }
 
-        $styles_to_remove = array(
+        // Low-level dependencies: only dequeue, keep registered for other core scripts.
+        $scripts_to_dequeue = array(
+            'wp-editor',
+            'wp-block-editor',
+            'wp-blocks',
+        );
+
+        foreach ( $scripts_to_dequeue as $handle ) {
+            wp_dequeue_script( $handle );
+        }
+
+        // Styles: dequeue only (no dependency chain concerns for CSS).
+        $styles_to_dequeue = array(
             'wp-edit-post',
             'wp-editor',
             'wp-block-editor',
@@ -101,9 +116,8 @@ class Assets {
             'wp-format-library',
         );
 
-        foreach ( $styles_to_remove as $handle ) {
+        foreach ( $styles_to_dequeue as $handle ) {
             wp_dequeue_style( $handle );
-            wp_deregister_style( $handle );
         }
     }
 }

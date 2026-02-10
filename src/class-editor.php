@@ -25,10 +25,22 @@ class Editor {
 
     /**
      * Replace the editor with Koenig editor.
+     *
+     * WordPress calls this filter twice:
+     * 1. During set_current_screen() (class-wp-screen.php) — just to decide the screen type.
+     * 2. During post.php/post-new.php — the actual replacement.
+     *
+     * We must only output HTML on the second call. The load-{pagenow} action
+     * fires between the two calls (in admin.php), so we use it as a sentinel.
      */
     public function replace_editor( $replace, $post ) {
         if ( ! Plugin::is_enabled_for( get_post_type( $post ) ) ) {
             return $replace;
+        }
+
+        // First call (set_current_screen): signal we'll replace, but don't output yet.
+        if ( ! did_action( 'load-post.php' ) && ! did_action( 'load-post-new.php' ) ) {
+            return true;
         }
 
         // Post lock: warn if another user is editing, then set our lock.
