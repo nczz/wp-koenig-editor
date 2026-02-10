@@ -69,11 +69,18 @@
   --koenig-color-bg-page: #16213e;
 }
 
+/* React mount point — must fill the fixed wrapper and constrain children */
+#koenig-editor-root {
+    flex: 1;
+    min-height: 0;
+}
+
 /* App container */
 .koenig-app {
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
     font-family: var(--koenig-font-family);
     color: var(--koenig-color-text);
     background: var(--koenig-color-bg);
@@ -267,6 +274,7 @@
 /* ===== Editor Main ===== */
 .koenig-editor-main {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
     display: flex;
     justify-content: center;
